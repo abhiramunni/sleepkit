@@ -1,0 +1,39 @@
+<script>
+(function(){
+'use strict';
+var KEY='sleepkit-v1';
+var $=function(id){return document.getElementById(id)};
+function safeScroll(el){try{if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}}
+function localISO(d){var p=function(n){return (n<10?'0':'')+n};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
+function todayISO(){return localISO(new Date())}
+function yesterdayISO(){return localISO(new Date(Date.now()-86400000))}
+
+/* ---------- state ---------- */
+var SEED_NIGHTS=[
+  {date:'2026-11-19',bed:1420,wake:410,q:4,note:'Read 20 pages, no phone after 10',tags:['book','no-phone'],sample:true},
+  {date:'2026-11-18',bed:1425,wake:415,q:4,note:'Early dinner, felt rested',tags:['early-dinner'],sample:true},
+  {date:'2026-11-17',bed:1400,wake:390,q:4,note:'Rain sounds, slept deep',tags:['rain'],sample:true},
+  {date:'2026-11-16',bed:65,wake:420,q:2,note:'Match ran late, wired after',tags:['late-screen','caffeine'],sample:true},
+  {date:'2026-11-15',bed:1430,wake:430,q:4,note:'Long drive day, tired out',tags:['exercise'],sample:true},
+  {date:'2026-11-14',bed:30,wake:450,q:3,note:'Wedding planning calls',tags:['late-screen'],sample:true},
+  {date:'2026-11-13',bed:1410,wake:400,q:4,note:'Warm milk, lights out early',tags:['warm-milk'],sample:true}
+];
+var WD_ITEMS=[
+  {t:'Phone on charge outside the bedroom',s:'Out of reach beats willpower.'},
+  {t:'Dim the lights',s:'Low light tells your brain the day is ending.'},
+  {t:'Warm milk or herbal tea',s:'A warm drink, no caffeine.'},
+  {t:'Ten pages of a book',s:'Paper, not a screen.'},
+  {t:'Lay out tomorrow\u2019s clothes',s:'One less decision in the morning.'},
+  {t:'Lights out by 11:00 PM',s:'The plan only works if you keep it.'}
+];
+function defaultState(){
+  return {v:1,bedtime:1380,wake:390,target:450,nights:SEED_NIGHTS.slice(),
+    wdDate:todayISO(),wdDone:[0,2,4],seen:false,coachDone:false};
+}
+var state=defaultState();
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var s=JSON.parse(raw);if(s&&s.v===1)state=s;}
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+/* @@NEXT@@ */

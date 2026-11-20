@@ -1,0 +1,99 @@
+/* ---------- nap timer ---------- */
+var nap={total:1200,left:1200,running:false,timer:null};
+function napFmt(s){var m=Math.floor(s/60),r=s%60;return (m<10?'0':'')+m+':'+(r<10?'0':'')+r}
+function renderNap(){
+  $('napClock').textContent=napFmt(nap.left);
+  var C=653.4;
+  $('napArc').style.strokeDashoffset=String(C*(1-nap.left/nap.total));
+  $('napState').textContent=nap.running?'Napping…':(nap.left===nap.total?'Ready':'Paused');
+  $('napStart').textContent=nap.running?'Pause':'Start nap';
+}
+function chime(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return;
+    var ac=new AC();
+    [0,0.35,0.7].forEach(function(t){
+      var o=ac.createOscillator(),g=ac.createGain();
+      o.connect(g);g.connect(ac.destination);
+      o.frequency.value=880;g.gain.setValueAtTime(0.0001,ac.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.25,ac.currentTime+t+0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+t+0.3);
+      o.start(ac.currentTime+t);o.stop(ac.currentTime+t+0.32);
+    });
+  }catch(e){}
+}
+function bindNap(){
+  $('napPresets').querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      $('napPresets').querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+      stopNap();
+      nap.total=parseInt(b.getAttribute('data-min'),10)*60;
+      nap.left=nap.total;renderNap();
+    });
+  });
+  $('napStart').addEventListener('click',function(){
+    if(nap.running){stopNap();renderNap();return}
+    if(nap.left<=0){nap.left=nap.total}
+    nap.running=true;renderNap();
+    $('napMsg').textContent='Timer running. Lie down, breathe out slowly, and let the chime wake you.';
+    nap.timer=setInterval(function(){
+      nap.left--;
+      if(nap.left<=0){
+        stopNap();nap.left=0;renderNap();
+        $('napState').textContent='Done';
+        $('napMsg').textContent='Time to get up — stretch, splash water on your face, and step into the light.';
+        chime();
+        return;
+      }
+      renderNap();
+    },1000);
+  });
+  $('napReset').addEventListener('click',function(){
+    stopNap();nap.left=nap.total;renderNap();
+    $('napMsg').textContent='Tip: a coffee right before a 20-minute nap — the “coffee nap” — works because the caffeine kicks in just as you wake.';
+  });
+}
+function stopNap(){nap.running=false;if(nap.timer){clearInterval(nap.timer);nap.timer=null}}
+/* ---------- wind-down ---------- */
+function renderWd(){
+  if(state.wdDate!==todayISO()){state.wdDate=todayISO();state.wdDone=[];save()}
+  var ul=$('wdList');
+  ul.innerHTML=WD_ITEMS.map(function(it,i){
+    var done=state.wdDone.indexOf(i)>=0;
+    return '<li class="'+(done?'done':'')+'" data-wd="'+i+'" tabindex="0"><span class="wd-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></span><span class="wd-t">'+it.t+'<small>'+it.s+'</small></span></li>';
+  }).join('');
+  ul.querySelectorAll('li').forEach(function(li){
+    var toggle=function(){
+      var i=parseInt(li.getAttribute('data-wd'),10);
+      var ix=state.wdDone.indexOf(i);
+      if(ix>=0)state.wdDone.splice(ix,1);else state.wdDone.push(i);
+      save();renderWd();
+    };
+    li.addEventListener('click',toggle);
+    li.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
+  });
+  var done=state.wdDone.length,total=WD_ITEMS.length;
+  $('wdNum').textContent=done+' of '+total;
+  var C=389.5;
+  $('wdRing').style.strokeDashoffset=String(C*(1-done/total));
+}
+/* ---------- payoff ---------- */
+function renderPayoff(){
+  var s=weekStats();
+  $('payoffDebt').textContent=fmtDur(s.debt);
+  var opts=$('payoffOpts');
+  if(s.debt<=0){
+    opts.innerHTML='<div class="payoff-opt" style="grid-column:1/-1"><b>All clear</b><span>No sleep debt this week. Keep the routine going.</span></div>';
+    $('payoffNote').textContent='You are even. A steady bedtime is what keeps it that way.';
+    return;
+  }
+  opts.innerHTML=[15,20,30].map(function(extra){
+    var nights=Math.ceil(s.debt/extra);
+    return '<div class="payoff-opt"><b>'+nights+' night'+(nights===1?'':'s')+'</b><span>at +'+extra+' min earlier<br>each night</span></div>';
+  }).join('');
+  var best=Math.ceil(s.debt/20);
+  $('payoffNote').textContent='Going to bed 20 minutes earlier for '+best+' nights clears it — no alarm changes needed.';
+}
+/* @@NEXT@@ */

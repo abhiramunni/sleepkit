@@ -1,0 +1,115 @@
+/* ---------- sleep log ---------- */
+var logQ=4,logTags=[];
+function renderNights(){
+  var list=sortedNights().slice(0,7);
+  var el=$('nightList');
+  if(!list.length){el.innerHTML='<div class="empty">No nights logged yet. Log last night — it takes thirty seconds.</div>';return}
+  el.innerHTML=list.map(function(n,i){
+    var d=durMin(n.bed,n.wake);
+    var dots='';for(var k=1;k<=5;k++)dots+='<i class="'+(k<=n.q?'f':'')+'"></i>';
+    return '<div class="night-row"><div class="night-date"><b>'+niceDate(n.date)+'</b><span>'+fmtMin(n.bed)+' – '+fmtMin(n.wake)+'</span></div>'+
+      '<div class="night-hours">'+fmtDur(d)+'</div>'+
+      '<div class="night-note"><span class="qdots" aria-label="Quality '+n.q+' of 5">'+dots+'</span>'+(n.note?'<br>'+escapeHtml(n.note):'')+'</div>'+
+      '<button class="icon-btn" type="button" data-del="'+i+'" aria-label="Delete night of '+n.date+'">×</button></div>';
+  }).join('');
+  el.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var idx=parseInt(b.getAttribute('data-del'),10);
+      var target=sortedNights().slice(0,7)[idx];
+      state.nights=state.nights.filter(function(n){return n!==target});
+      save();renderAll();
+    });
+  });
+}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function bindLog(){
+  $('logDate').value=yesterdayISO();
+  $('logStars').querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      logQ=parseInt(b.getAttribute('data-q'),10);
+      $('logStars').querySelectorAll('button').forEach(function(x){
+        x.classList.toggle('on',parseInt(x.getAttribute('data-q'),10)===logQ);
+      });
+    });
+  });
+  $('logTags').querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var t=b.getAttribute('data-tag');
+      var i=logTags.indexOf(t);
+      if(i>=0){logTags.splice(i,1);b.classList.remove('on')}
+      else{logTags.push(t);b.classList.add('on')}
+    });
+  });
+  $('logAddBtn').addEventListener('click',function(){
+    var date=$('logDate').value||yesterdayISO();
+    var bed=parseTime($('logBed').value),wake=parseTime($('logWake').value);
+    if(bed===null||wake===null){$('logMsg').textContent='Add both a bedtime and a wake time first.';return}
+    var note=$('logNote').value.trim();
+    state.nights=state.nights.filter(function(n){return n.date!==date});
+    state.nights.push({date:date,bed:bed,wake:wake,q:logQ,note:note,tags:logTags.slice(),sample:false});
+    save();renderAll();
+    $('logMsg').textContent='Saved — '+fmtDur(durMin(bed,wake))+' logged for '+niceDate(date)+'.';
+    $('logNote').value='';
+  });
+  $('clearLogBtn').addEventListener('click',function(){
+    if($('clearLogBtn').getAttribute('data-arm')==='1'){
+      state.nights=[];save();renderAll();
+      $('clearLogBtn').textContent='Clear my log';$('clearLogBtn').removeAttribute('data-arm');
+      return;
+    }
+    $('clearLogBtn').setAttribute('data-arm','1');
+    $('clearLogBtn').textContent='Tap again to clear';
+    setTimeout(function(){
+      if($('clearLogBtn').getAttribute('data-arm')==='1'){
+        $('clearLogBtn').textContent='Clear my log';$('clearLogBtn').removeAttribute('data-arm');
+      }
+    },4000);
+  });
+}
+/* ---------- week chart ---------- */
+function renderWeek(){
+  var s=weekStats();
+  $('wAvg').textContent=s.count?fmtDur(s.avg):'—';
+  $('wBest').textContent=s.count?fmtDur(s.best):'—';
+  $('wDebt').textContent=fmtDur(s.debt);
+  $('wHit').textContent=s.hit+' of '+s.count;
+  $('statAvg').textContent=s.count?fmtDur(s.avg)+' avg':'—';
+  $('statHit').textContent=s.hit+' of '+s.count;
+  $('statDebt').textContent=fmtDur(s.debt);
+  $('streakNum').textContent=s.streak;
+  $('streakChip').innerHTML='Streak <b>'+s.streak+' night'+(s.streak===1?'':'s')+'</b>';
+  var C=389.5;
+  $('streakRing').style.strokeDashoffset=String(C*(1-Math.min(s.streak,7)/7));
+  $('chartNote').textContent='Bars are hours slept each night. The dashed line is your '+fmtDur(state.target)+' target.';
+  drawChart(s);
+}
+function drawChart(s){
+  var cv=$('weekChart');if(!cv)return;
+  var ctx=null;try{ctx=cv.getContext('2d')}catch(e){}
+  if(!ctx)return;
+  var W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);
+  var nights=s.recent.slice().reverse();
+  var maxH=9;
+  var padL=8,padB=26,padT=14,plotW=W-padL*2,plotH=H-padT-padB;
+  var n=nights.length||1,bw=Math.min(56,plotW/n*0.55);
+  var targetY=padT+plotH*(1-state.target/60/maxH);
+  ctx.setLineDash([6,5]);ctx.strokeStyle='rgba(232,163,61,.85)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(padL,targetY);ctx.lineTo(W-padL,targetY);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#c9b8a3';ctx.font='11px Inter,sans-serif';ctx.textAlign='left';
+  ctx.fillText('Target '+fmtDur(state.target),padL,targetY-6);
+  nights.forEach(function(nt,i){
+    var d=durMin(nt.bed,nt.wake)/60;
+    var x=padL+plotW*(i+0.5)/n-bw/2;
+    var h=plotH*(d/maxH);
+    var y=padT+plotH-h;
+    ctx.fillStyle=d*60>=420?'#e8a33d':'#c96f3f';
+    ctx.beginPath();
+    if(ctx.roundRect){ctx.roundRect(x,y,bw,h,[6,6,0,0]);ctx.fill()}
+    else{ctx.fillRect(x,y,bw,h)}
+    ctx.fillStyle='#f7efe3';ctx.font='bold 12px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText(fmtDur(durMin(nt.bed,nt.wake)),x+bw/2,y-6);
+    ctx.fillStyle='#c9b8a3';ctx.font='11px Inter,sans-serif';
+    var p=nt.date.split('-');ctx.fillText(p[2]+'/'+p[1],x+bw/2,H-8);
+  });
+}
+/* @@NEXT@@ */

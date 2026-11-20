@@ -1,0 +1,69 @@
+<section id="sleepLog">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">The logbook</p>
+        <h2>Last night, in thirty seconds</h2>
+        <p>Log when you slept and how it felt. Patterns show up fast — the late screen, the late coffee, the good nights after a walk.</p>
+      </div>
+      <button class="btn ghost small" id="clearLogBtn" type="button">Clear my log</button>
+    </div>
+    <div class="log-grid">
+      <div class="card">
+        <h3>Log a night</h3>
+        <p class="helper" style="margin-bottom:14px">Bedtime and wake time are enough — the rest is optional.</p>
+        <div class="field-row">
+          <div class="field">
+            <label for="logDate">Night of</label>
+            <input type="date" id="logDate">
+          </div>
+          <div class="field">
+            <label>How did it feel?</label>
+            <div class="stars" id="logStars" role="radiogroup" aria-label="Sleep quality">
+              <button type="button" data-q="1" aria-label="1 out of 5">1</button>
+              <button type="button" data-q="2" aria-label="2 out of 5">2</button>
+              <button type="button" data-q="3" aria-label="3 out of 5">3</button>
+              <button type="button" data-q="4" aria-label="4 out of 5" class="on">4</button>
+              <button type="button" data-q="5" aria-label="5 out of 5">5</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="logBed">Fell asleep around</label>
+            <input type="time" id="logBed" value="23:30">
+          </div>
+          <div class="field">
+            <label for="logWake">Woke up at</label>
+            <input type="time" id="logWake" value="06:40">
+          </div>
+        </div>
+        <div class="field">
+          <label>What shaped this night? (tap all that apply)</label>
+          <div class="tags" id="logTags">
+            <button type="button" data-tag="warm-milk">Warm milk</button>
+            <button type="button" data-tag="book">Read a book</button>
+            <button type="button" data-tag="no-phone">No phone after 10</button>
+            <button type="button" data-tag="exercise">Exercised</button>
+            <button type="button" data-tag="late-screen">Late screen</button>
+            <button type="button" data-tag="caffeine">Late coffee</button>
+            <button type="button" data-tag="rain">Rain sounds</button>
+            <button type="button" data-tag="early-dinner">Early dinner</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="logNote">One line about the night (optional)</label>
+          <input type="text" id="logNote" maxlength="120" placeholder="e.g. Read 20 pages, no phone after 10">
+        </div>
+        <button class="btn" id="logAddBtn" type="button" style="width:100%;justify-content:center">Save this night</button>
+        <p class="helper" id="logMsg" style="margin-top:10px"></p>
+      </div>
+      <div class="card">
+        <h3>Recent nights</h3>
+        <p class="helper" style="margin-bottom:8px">Newest first. Tap the cross to delete a night.</p>
+        <div id="nightList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- @@NEXT@@ -->

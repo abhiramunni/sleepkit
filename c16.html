@@ -1,0 +1,57 @@
+/* ---------- time helpers ---------- */
+function parseTime(str){
+  if(!str||str.indexOf(':')<0)return null;
+  var p=str.split(':');var h=parseInt(p[0],10),m=parseInt(p[1],10);
+  if(isNaN(h)||isNaN(m))return null;
+  return h*60+m;
+}
+function norm(m){m%=1440;if(m<0)m+=1440;return m}
+function fmtMin(m){
+  m=norm(m);var h=Math.floor(m/60),mm=m%60,ap=h>=12?'PM':'AM',hh=h%12;if(hh===0)hh=12;
+  return hh+':'+(mm<10?'0':'')+mm+' '+ap;
+}
+function fmtDur(min){
+  min=Math.round(min);var h=Math.floor(min/60),m=min%60;
+  if(h===0)return m+'m';
+  return h+'h '+(m<10?'0':'')+m+'m';
+}
+function durMin(bed,wake){if(wake<=bed)wake+=1440;return wake-bed}
+var WORDS=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
+function cycleText(dur){
+  var full=Math.floor(dur/90),rem=dur%90;
+  var w=WORDS[full]||String(full);
+  if(rem===0)return w+' full sleep cycle'+(full===1?'':'s');
+  return w+' full cycle'+(full===1?'':'s')+' and '+rem+' minutes';
+}
+var FALL_ASLEEP=14,CYCLE=90;
+function bedtimesForWake(wake){return [4,5,6].map(function(c){return{cy:c,time:norm(wake-c*CYCLE-FALL_ASLEEP),hrs:c*1.5}})}
+function wakeTimesForBed(bed){return [4,5,6].map(function(c){return{cy:c,time:norm(bed+FALL_ASLEEP+c*CYCLE),hrs:c*1.5}})}
+function niceDate(iso){
+  try{var p=iso.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);
+    return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}catch(e){return iso}
+}
+/* ---------- week stats ---------- */
+function sortedNights(){return state.nights.slice().sort(function(a,b){return b.date<a.date?-1:1})}
+function weekStats(){
+  var recent=sortedNights().slice(0,7);
+  var total=0,best=0,hit=0,debt=0;
+  recent.forEach(function(n){
+    var d=durMin(n.bed,n.wake);total+=d;if(d>best)best=d;
+    if(d>=420)hit++;
+    if(d<state.target)debt+=state.target-d;
+  });
+  var avg=recent.length?total/recent.length:0;
+  var streak=0,prev=null;
+  var desc=sortedNights();
+  for(var i=0;i<desc.length;i++){
+    var n=desc[i];
+    if(prev){
+      var pd=new Date(prev),cd=new Date(n.date);
+      if((pd-cd)!==86400000)break;
+    }
+    if(durMin(n.bed,n.wake)<420)break;
+    streak++;prev=n.date;
+  }
+  return {recent:recent,avg:avg,best:best,hit:hit,debt:debt,streak:streak,count:recent.length};
+}
+/* @@NEXT@@ */

@@ -1,0 +1,50 @@
+/* ---------- intro ---------- */
+function runIntro(){
+  var intro=$('intro');
+  var stars=$('introStars');
+  var html='';
+  for(var i=0;i<42;i++){
+    var l=(Math.random()*100).toFixed(1),t=(Math.random()*100).toFixed(1),
+        d=(Math.random()*2.6).toFixed(2),s=(Math.random()*1.6+0.8).toFixed(1);
+    html+='<i style="left:'+l+'%;top:'+t+'%;animation-delay:'+d+'s;width:'+s+'px;height:'+s+'px"></i>';
+  }
+  stars.innerHTML=html;
+  var quick=state.seen;
+  if(quick)intro.classList.add('quick');
+  var total=quick?1200:4000;
+  var bar=$('introBar');
+  var start=Date.now();
+  var iv=setInterval(function(){
+    var p=Math.min(1,(Date.now()-start)/total);
+    if(bar)bar.style.width=(p*100)+'%';
+    if(p>=1)finishIntro();
+  },80);
+  var finished=false;
+  function finishIntro(){
+    if(finished)return;finished=true;
+    clearInterval(iv);
+    intro.classList.add('done');
+    if(!state.seen){state.seen=true;save()}
+    if(!state.coachDone)setTimeout(function(){showCoach(0)},650);
+  }
+  $('skipIntro').addEventListener('click',finishIntro);
+}
+/* ---------- boot ---------- */
+function renderAll(){
+  renderTonight();renderCycles();renderNights();renderWeek();renderWd();renderPayoff();renderNap();
+}
+bindTonight();bindCycles();bindLog();bindNap();bindGuides();bindSettings();bindCopyErase();bindCoach();
+renderAll();
+runIntro();
+setInterval(renderTonight,30000);
+window.SleepKit={
+  getState:function(){return state},
+  parseTime:parseTime,fmtMin:fmtMin,fmtDur:fmtDur,durMin:durMin,
+  bedtimesForWake:bedtimesForWake,wakeTimesForBed:wakeTimesForBed,
+  weekStats:weekStats,summaryText:summaryText,cycleText:cycleText,
+  nap:nap,renderAll:renderAll
+};
+})();
+</script>
+</body>
+</html>

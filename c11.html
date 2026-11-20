@@ -1,0 +1,35 @@
+<section id="napTimer">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">The power nap</p>
+        <h2>Twenty minutes. No more.</h2>
+        <p>A short nap sharpens you; a long one drops you into deep sleep and you wake up worse. Set it, lie down, let the chime wake you.</p>
+      </div>
+    </div>
+    <div class="card nap-grid">
+      <div class="nap-ring">
+        <svg viewBox="0 0 240 240" aria-hidden="true">
+          <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(247,239,227,.12)" stroke-width="12"/>
+          <circle id="napArc" cx="120" cy="120" r="104" fill="none" stroke="#e8a33d" stroke-width="12" stroke-linecap="round" stroke-dasharray="653.4" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
+        </svg>
+        <div class="nap-num"><b id="napClock">20:00</b><span id="napState">Ready</span></div>
+      </div>
+      <div>
+        <h3>How long?</h3>
+        <div class="nap-presets" id="napPresets">
+          <button type="button" data-min="10">10 min · a reset</button>
+          <button type="button" data-min="20" class="on">20 min · the classic</button>
+          <button type="button" data-min="30">30 min · a deep-ish rest</button>
+        </div>
+        <p class="helper">Nap before 3 PM if you can — later naps steal from tonight. Set an alarm as a backup; this timer chimes once and stops.</p>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn" id="napStart" type="button">Start nap</button>
+          <button class="btn ghost" id="napReset" type="button">Reset</button>
+        </div>
+        <p class="helper" id="napMsg" style="margin-top:12px">Tip: a coffee right before a 20-minute nap — the “coffee nap” — works because the caffeine kicks in just as you wake.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- @@NEXT@@ -->

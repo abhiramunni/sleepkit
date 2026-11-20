@@ -1,0 +1,36 @@
+<section id="cycleFinder">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">The 90-minute rule</p>
+        <h2>Find your best time to sleep — or wake</h2>
+        <p>Pick when you must wake up and we work backwards, or pick when you can sleep and we find the gentlest wake-up. Four, five or six full cycles — never a half cycle.</p>
+      </div>
+      <div class="mode-toggle" role="group" aria-label="Calculator mode">
+        <button type="button" id="modeWake" class="on">I must wake at…</button>
+        <button type="button" id="modeBed">I can sleep at…</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cycle-grid">
+        <div class="cycle-picker">
+          <div class="field" style="margin-bottom:0">
+            <label for="dialTime" id="dialLabel">Wake-up time</label>
+            <input type="time" id="dialTime" value="06:30">
+          </div>
+          <div>
+            <div class="field"><label>How many cycles?</label></div>
+            <div class="cycle-opts" id="cycleOpts">
+              <button type="button" class="cycle-opt" data-cycles="4"><b>4 cycles</b><span>6h 00m · short night</span></button>
+              <button type="button" class="cycle-opt on" data-cycles="5"><b>5 cycles</b><span>7h 30m · the sweet spot</span></button>
+              <button type="button" class="cycle-opt" data-cycles="6"><b>6 cycles</b><span>9h 00m · full recharge</span></button>
+            </div>
+          </div>
+          <p class="helper">We add 14 minutes for falling asleep — the average for a healthy adult. If you usually take longer, add it in your head.</p>
+        </div>
+        <div class="cycle-results" id="cycleResults"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- @@NEXT@@ -->

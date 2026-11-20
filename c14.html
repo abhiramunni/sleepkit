@@ -1,0 +1,61 @@
+<section id="payoff">
+  <div class="wrap">
+    <div class="split">
+      <div class="card">
+        <p class="kicker">Pay it back</p>
+        <h3>Clear your sleep debt, gently</h3>
+        <p class="helper" style="margin:6px 0 16px">You cannot “catch up” in one weekend lie-in — but a little extra each night clears it in about a week. Your current debt is <b id="payoffDebt" style="color:var(--amber)">3h 35m</b>.</p>
+        <div class="payoff-opts" id="payoffOpts"></div>
+        <p class="helper" style="margin-top:14px" id="payoffNote">Going to bed 20 minutes earlier for 11 nights clears it — no alarm changes needed.</p>
+      </div>
+      <div class="card">
+        <p class="kicker">Settings &amp; your data</p>
+        <h3>Make it yours</h3>
+        <div class="set-row">
+          <div><b>Sleep target</b><span>Hours you aim for each night.</span></div>
+          <select id="targetSel" aria-label="Sleep target in hours">
+            <option value="420">7h 00m</option>
+            <option value="450" selected>7h 30m</option>
+            <option value="480">8h 00m</option>
+            <option value="540">9h 00m</option>
+          </select>
+        </div>
+        <div class="set-row">
+          <div><b>Copy my sleep summary</b><span>One tidy paragraph for your notes or a message.</span></div>
+          <button class="btn small" id="copyBtn" type="button">Copy summary</button>
+        </div>
+        <div class="set-row">
+          <div><b>Remove sample nights</b><span>Deletes the 7 sample nights we started you with. Keeps nights you logged.</span></div>
+          <button class="btn ghost small" id="removeSamplesBtn" type="button">Remove samples</button>
+        </div>
+        <div class="set-row">
+          <div><b>Erase everything</b><span>Two taps. Wipes all nights, settings and checklists on this device.</span></div>
+          <button class="btn danger small" id="eraseBtn" type="button">Erase all</button>
+        </div>
+        <p class="helper" id="copyMsg" style="margin-top:12px"></p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <b style="color:var(--paper)">SleepKit</b> — sleep better, wake brighter.
+    <p class="fine">SleepKit is a planning and tracking tool, not medical advice. If you snore loudly, gasp in your sleep, feel exhausted despite full nights, or have trouble sleeping for more than a few weeks, talk to a doctor — a sleep study can find what an app never will. Your nights stay on your device; nothing is uploaded anywhere.</p>
+  </div>
+</footer>
+
+<div id="coach" role="dialog" aria-label="Quick tour">
+  <div class="coach-card">
+    <p class="kicker" id="coachStep">Step 1 of 3</p>
+    <h3 id="coachTitle">Find your bedtime</h3>
+    <p id="coachText">Tell SleepKit when you must wake up, and it works backwards in 90-minute cycles to find the bedtime that lets you wake up fresh.</p>
+    <div class="coach-dots"><i class="on"></i><i></i><i></i></div>
+    <div class="coach-actions">
+      <button class="btn ghost" id="coachSkip" type="button">Skip tour</button>
+      <button class="btn" id="coachNext" type="button">Next</button>
+    </div>
+  </div>
+</div>
+<!-- @@NEXT@@ -->

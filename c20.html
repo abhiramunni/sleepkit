@@ -1,0 +1,92 @@
+/* ---------- guides / settings ---------- */
+function bindGuides(){
+  document.querySelectorAll('#guideGrid .guide').forEach(function(g){
+    var toggle=function(){g.classList.toggle('open')};
+    g.addEventListener('click',toggle);
+    g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
+  });
+}
+function bindSettings(){
+  $('targetSel').value=String(state.target);
+  $('targetSel').addEventListener('change',function(){
+    state.target=parseInt($('targetSel').value,10);save();renderAll();
+  });
+  $('removeSamplesBtn').addEventListener('click',function(){
+    var before=state.nights.length;
+    state.nights=state.nights.filter(function(n){return !n.sample});
+    save();renderAll();
+    $('copyMsg').textContent='Removed '+(before-state.nights.length)+' sample night'+(before-state.nights.length===1?'':'s')+'. Your own nights stay put.';
+  });
+}
+/* ---------- copy / erase ---------- */
+function summaryText(){
+  var s=weekStats();
+  var best=s.recent.length?s.recent.reduce(function(a,b){return durMin(a.bed,a.wake)>=durMin(b.bed,b.wake)?a:b}):null;
+  var lines=[];
+  lines.push('My sleep this week (SleepKit): avg '+fmtDur(s.avg)+' a night, '+s.hit+' of '+s.count+' nights hit 7 hours, sleep debt '+fmtDur(s.debt)+', streak '+s.streak+' night'+(s.streak===1?'':'s')+'.');
+  lines.push('Tonight: bed '+fmtMin(state.bedtime)+', wake '+fmtMin(state.wake)+' ('+cycleText(durMin(state.bedtime,state.wake))+').');
+  if(best)lines.push('Best night: '+fmtDur(durMin(best.bed,best.wake))+' on '+niceDate(best.date)+'.');
+  return lines.join(' ');
+}
+function bindCopyErase(){
+  $('copyBtn').addEventListener('click',function(){
+    var txt=summaryText();
+    var done=function(){$('copyMsg').textContent='Summary copied — paste it anywhere.'};
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(done,function(){fallbackCopy(txt);done()});
+      }else{fallbackCopy(txt);done()}
+    }catch(e){fallbackCopy(txt);done()}
+  });
+  $('eraseBtn').addEventListener('click',function(){
+    if($('eraseBtn').getAttribute('data-arm')==='1'){
+      try{localStorage.removeItem(KEY)}catch(e){}
+      state=defaultState();save();renderAll();
+      $('eraseBtn').textContent='Erase all';$('eraseBtn').removeAttribute('data-arm');
+      $('copyMsg').textContent='Everything erased. Fresh start — tonight is night one.';
+      return;
+    }
+    $('eraseBtn').setAttribute('data-arm','1');
+    $('eraseBtn').textContent='Tap again to erase';
+    setTimeout(function(){
+      if($('eraseBtn').getAttribute('data-arm')==='1'){
+        $('eraseBtn').textContent='Erase all';$('eraseBtn').removeAttribute('data-arm');
+      }
+    },4000);
+  });
+}
+function fallbackCopy(txt){
+  try{
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    if(document.execCommand)document.execCommand('copy');
+    document.body.removeChild(ta);
+  }catch(e){}
+}
+/* ---------- coach ---------- */
+var COACH=[
+  {t:'Find your bedtime',x:'Tell SleepKit when you must wake up, and it works backwards in 90-minute cycles to find the bedtime that lets you wake up fresh.',el:'cycleFinder'},
+  {t:'Log last night',x:'Thirty seconds a morning: when you slept, how it felt, what shaped it. Patterns show up within a week.',el:'sleepLog'},
+  {t:'Nap the right way',x:'Twenty minutes, no more — with a chime to wake you. A short nap sharpens the afternoon without stealing tonight.',el:'napTimer'}
+];
+var coachStep=0;
+function showCoach(step){
+  coachStep=step;
+  $('coachStep').textContent='Step '+(step+1)+' of 3';
+  $('coachTitle').textContent=COACH[step].t;
+  $('coachText').textContent=COACH[step].x;
+  $('coachNext').textContent=step===2?'Done':'Next';
+  document.querySelectorAll('.coach-dots i').forEach(function(d,i){d.classList.toggle('on',i===step)});
+  $('coach').classList.add('show');
+  safeScroll($(COACH[step].el));
+}
+function hideCoach(){$('coach').classList.remove('show')}
+function bindCoach(){
+  $('coachNext').addEventListener('click',function(){
+    if(coachStep>=2){state.coachDone=true;save();hideCoach();return}
+    showCoach(coachStep+1);
+  });
+  $('coachSkip').addEventListener('click',function(){state.coachDone=true;save();hideCoach()});
+  $('tourBtn').addEventListener('click',function(){showCoach(0)});
+}
+/* @@NEXT@@ */

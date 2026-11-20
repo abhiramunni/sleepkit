@@ -1,0 +1,32 @@
+<section id="weekView">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">The week in sleep</p>
+        <h2>Seven nights, one honest picture</h2>
+        <p>The dashed line is your target. Nights above it are banked; nights below it are debt you carry into the next day.</p>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><span>Average night</span><b id="wAvg">6h 59m</b></div>
+      <div class="stat"><span>Best night</span><b id="wBest">7h 20m</b></div>
+      <div class="stat"><span>Sleep debt</span><b id="wDebt">3h 35m</b></div>
+      <div class="stat"><span>7-hour nights</span><b id="wHit">6 of 7</b></div>
+    </div>
+    <div class="card chart-card">
+      <div>
+        <canvas id="weekChart" width="640" height="220" aria-label="Bar chart of sleep hours for the last seven nights"></canvas>
+        <p class="helper" id="chartNote" style="margin-top:10px">Bars are hours slept each night. The dashed line is your 7h 30m target.</p>
+      </div>
+      <div class="ring-wrap">
+        <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+          <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(247,239,227,.12)" stroke-width="12"/>
+          <circle id="streakRing" cx="75" cy="75" r="62" fill="none" stroke="#e8a33d" stroke-width="12" stroke-linecap="round" stroke-dasharray="389.5" stroke-dashoffset="167" transform="rotate(-90 75 75)"/>
+        </svg>
+        <div class="ring-num" id="streakNum">3</div>
+        <div class="ring-lab">night streak of<br>7 hours or more</div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- @@NEXT@@ -->

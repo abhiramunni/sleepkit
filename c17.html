@@ -1,0 +1,69 @@
+/* ---------- tonight ---------- */
+function nextSleepEvent(){
+  var now=new Date();var nowMin=now.getHours()*60+now.getMinutes();
+  var bed=state.bedtime,wake=state.wake;
+  if(nowMin<wake)return{label:'until wake-up',mins:wake-nowMin};
+  if(nowMin<bed)return{label:'until bedtime',mins:bed-nowMin};
+  return{label:'until wake-up',mins:(1440-nowMin)+wake};
+}
+function renderTonight(){
+  $('bedTime').value=fmt24(state.bedtime);
+  $('wakeTime').value=fmt24(state.wake);
+  var ev=nextSleepEvent();
+  $('countdown').textContent=fmtDur(ev.mins);
+  $('countdownLab').textContent=ev.label;
+  $('caffeineCut').textContent=fmtMin(state.bedtime-480);
+  $('screensOff').textContent=fmtMin(state.bedtime-60);
+  $('windDownAt').textContent=fmtMin(state.bedtime-30);
+  var d=durMin(state.bedtime,state.wake);
+  $('tonightMean').textContent='That is '+fmtDur(d)+' in bed — '+cycleText(d)+'.';
+  $('tonightChip').innerHTML='Tonight <b>'+fmtMin(state.bedtime)+'</b>';
+}
+function fmt24(m){m=norm(m);var h=Math.floor(m/60),mm=m%60;return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm}
+/* ---------- cycle finder ---------- */
+var cycleMode='wake',cyclePick=5;
+function renderCycles(){
+  $('dialLabel').textContent=cycleMode==='wake'?'Wake-up time':'Bedtime';
+  var base=parseTime($('dialTime').value);
+  if(base===null)base=cycleMode==='wake'?state.wake:state.bedtime;
+  var list=cycleMode==='wake'?bedtimesForWake(base):wakeTimesForBed(base);
+  var html='';
+  list.forEach(function(r){
+    var best=r.cy===cyclePick;
+    var verb=cycleMode==='wake'?'Sleep at ':'Wake at ';
+    var other=cycleMode==='wake'?fmtMin(base):fmtMin(base);
+    var hrs=r.hrs%1===0?r.hrs+' hours':r.hrs.toFixed(1).replace('.5','\u00BD')+' hours';
+    html+='<div class="cycle-res'+(best?' best':'')+'"><div class="big">'+fmtMin(r.time)+'</div><div class="meta"><b>'+r.cy+' cycles · '+hrs+'</b><span>'+verb.toLowerCase()+fmtMin(r.time)+' gives you '+r.cy+' full cycles '+(cycleMode==='wake'?'before '+other:'after '+other)+'.</span></div>'+(best?'<span class="badge">Best</span>':'<span class="badge soft">'+r.cy+' cycles</span>')+'</div>';
+  });
+  $('cycleResults').innerHTML=html;
+}
+function bindCycles(){
+  $('modeWake').addEventListener('click',function(){
+    cycleMode='wake';$('modeWake').classList.add('on');$('modeBed').classList.remove('on');
+    $('dialTime').value=fmt24(state.wake);renderCycles();
+  });
+  $('modeBed').addEventListener('click',function(){
+    cycleMode='bed';$('modeBed').classList.add('on');$('modeWake').classList.remove('on');
+    $('dialTime').value=fmt24(state.bedtime);renderCycles();
+  });
+  $('dialTime').addEventListener('change',renderCycles);
+  $('dialTime').addEventListener('input',renderCycles);
+  var opts=document.querySelectorAll('#cycleOpts .cycle-opt');
+  opts.forEach(function(b){
+    b.addEventListener('click',function(){
+      opts.forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');cyclePick=parseInt(b.getAttribute('data-cycles'),10);renderCycles();
+    });
+  });
+}
+function bindTonight(){
+  $('bedTime').addEventListener('change',function(){
+    var v=parseTime($('bedTime').value);if(v===null)return;
+    state.bedtime=v;save();renderTonight();
+  });
+  $('wakeTime').addEventListener('change',function(){
+    var v=parseTime($('wakeTime').value);if(v===null)return;
+    state.wake=v;save();renderTonight();
+  });
+}
+/* @@NEXT@@ */
